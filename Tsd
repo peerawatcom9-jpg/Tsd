@@ -1,0 +1,41 @@
+-- ==========================================
+-- Simple Knife Script (Server Script)
+-- ==========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+local damage = 50 -- ตั้งค่าความเสียหาย (เลือดลดเท่าไหร่ต่อการฟัน 1 ครั้ง)
+local cooldown = 0.5 -- ระยะเวลาคูลดาวน์การฟัน (วินาที)
+local canDamage = false
+
+-- ฟังก์ชันเมื่อมีดฟันไปโดนบางอย่าง
+local function onTouch(otherPart)
+    if not canDamage then return end
+    
+    local character = otherPart.Parent
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local myCharacter = tool.Parent
+    
+    -- เช็กว่าสิ่งที่ฟันโดนเป็นผู้เล่นอื่น (ไม่ใช่ตัวเอง) และมี Humanoid อยู่จริง
+    if humanoid and character ~= myCharacter then
+        canDamage = false -- ป้องกันการโดนความเสียหายซ้ำซ้อนในครั้งเดียว
+        humanoid:TakeDamage(damage) -- ลดเลือดผู้เล่นคนนั้น
+    end
+end
+
+-- ฟังก์ชันเมื่อผู้เล่นกดคลิก/กดแท็บเพื่อใช้มีด
+local function onActivated()
+    if canDamage then return end
+    
+    canDamage = true
+    
+    -- (สามารถใส่ Animation การฟันมีดตรงนี้เพิ่มได้)
+    
+    task.wait(cooldown)
+    canDamage = false
+end
+
+-- เชื่อมต่อ Event เข้ากับฟังก์ชัน
+handle.Touched:Connect(onTouch)
+tool.Activated:Connect(onActivated)
